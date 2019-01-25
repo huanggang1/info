@@ -39,7 +39,7 @@
                                     class="fa fa-angle-left pull-right"></i></a>
                         <ul class="treeview-menu">
                             @foreach($comData[$v['id']] as $vv)
-                                <li @if(in_array($vv['id'],$comData['openarr'])) class="active" @endif><a href="{{URL::route($vv['name'])}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-circle-o"></i>{{$vv['display_name']}}</a></li>
+                                <li @if(in_array($vv['id'],$comData['openarr'])) class="active" @endif><a href="/{{$vv['name']}}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-circle-o"></i>{{$vv['display_name']}}</a></li>
                             @endforeach
                         </ul>
                     </li>
