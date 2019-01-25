@@ -105,7 +105,7 @@ class School extends Model {
     public function getSchool($id){
 //        $info = DB::table('school')->where('id','=',$id)->get();
         $info = School::find($id);
-        return $info;
+        return $info['attributes'];
     }
     /**
      * 查询列表
