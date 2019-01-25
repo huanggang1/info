@@ -59,6 +59,15 @@ class GetMenu {
                 $data[$v->cid][] = $v->toarray();
             }
         }
+        foreach($data as $key=>$val){
+            if($key!='top'){
+               foreach($val as $k=>$v){
+                   
+                $val[$k]['name'] = implode(explode('.', $v['name']),'/');
+               }
+               $data[$key] = $val;
+            }
+        }
         foreach ($data[0] as $v) {
             if (isset($data[$v['id']]) && is_array($data[$v['id']]) && count($data[$v['id']]) > 0) {
                 $data['top'][] = $v;
