@@ -1,26 +1,18 @@
-<div class="form-group">
-    <label for="tag" class="col-md-3 control-label">用户名</label>
-    <div class="col-md-5">
-        <input type="text" class="form-control" name="name" id="tag" value="" autofocus>
-    </div>
+<div>
+    <label for="tag" >姓名:</label><input type="text" name="name" id="tag" value="" autofocus>
+    <label for="tag" >性别:</label><input type="text"  name="sex" id="tag" value="" autofocus>
+    <label for="tag" >民族:</label><input type="text"  name="sex" id="tag" value="" autofocus>
+    <label for="tag" >政治面貌:</label><input type="text"  name="sex" id="tag" value="" autofocus>
 </div>
-<div class="form-group">
-    <label for="tag" class="col-md-3 control-label">邮箱</label>
-    <div class="col-md-5">
-        <input type="text" class="form-control" name="email" id="tag" value="" autofocus>
-    </div>
+<div>
+    <label for="tag" >姓名:</label><input type="text" name="name" id="tag" value="" autofocus>
+    <label for="tag" >性别:</label><input type="text"  name="sex" id="tag" value="" autofocus>
+    <label for="tag" >民族:</label><input type="text"  name="sex" id="tag" value="" autofocus>
+    <label for="tag" >政治面貌:</label><input type="text"  name="sex" id="tag" value="" autofocus>
 </div>
-
-<div class="form-group">
-    <label for="tag" class="col-md-3 control-label">密码</label>
-    <div class="col-md-5">
-        <input type="password" class="form-control" name="password" id="tag" value="" autofocus>
-    </div>
-</div>
-
-<div class="form-group">
-    <label for="tag" class="col-md-3 control-label">密码确认</label>
-    <div class="col-md-5">
-        <input type="password" class="form-control" name="repassword" id="tag" value="" autofocus>
-    </div>
+<div>
+    <label for="tag" >姓名:</label><input type="text" name="name" id="tag" value="" autofocus>
+    <label for="tag" >性别:</label><input type="text"  name="sex" id="tag" value="" autofocus>
+    <label for="tag" >民族:</label><input type="text"  name="sex" id="tag" value="" autofocus>
+    <label for="tag" >政治面貌:</label><input type="text"  name="sex" id="tag" value="" autofocus>
 </div>

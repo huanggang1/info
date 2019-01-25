@@ -3,25 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Role;
-use App\Models\AdminUser as User;
+use App\Models\Info as Info;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Input;
-use DB;
 use Excel;
 use PDO;
+use Storage;
 
 class InfoController extends Controller {
 
-    protected $fields = [
-        'name', 'sex', 'nation', 'politicalStatus', 'identityNum', 'nativePlace', 'workUnit',
-        'poorCounty', 'phone', 'remarksPhone', 'qqNumber', 'weChat', 'reservedFields', 'examineeNum',
-        'achievement', 'applyTime', 'initialSchool', 'level', 'studyForm', 'applySchool',
-        'applyProfession', 'checkAddress', 'unit', 'addPoints', 'province', 'crossProfession',
-        'enterFIeld', 'enrollFee', 'payee', 'totalCost', 'costFieldsOne', 'yearOne',
-        'yearTwo', 'yearTree', 'costFieldsTwo', 'person', 'introducer', 'remarks'
-    ];
+    protected $info = null;
+
+    public function __construct() {
+        $this->info = new Info();
+    }
 
     /**
      * Display a listing of the resource.
@@ -37,48 +34,7 @@ class InfoController extends Controller {
             $order = $request->get('order');
             $columns = $request->get('columns');
             $param = Input::all();
-            //查询条件
-//            $data['recordsTotal'] =  DB::table()::count();
-//            if (strlen($search['value']) > 0) {
-            $data['recordsFiltered'] = DB::table('info_users')->where(function ($query) use ($param) {
-                        if ($param['btName']) {
-                            $query->where('name', 'like', '%' . $param['btName'] . '%');
-                        }
-                        if ($param['btNumber']) {
-                            $query->where('examineeNum', 'like', '%' . $param['btNumber'] . '%');
-                        }
-                        if ($param['btPhone']) {
-                            $query->where('identityNum', 'like', '%' . $param['btPhone'] . '%');
-                        }
-                        if ($param['btSchool']) {
-                            $query->where('applySchool', 'like', '%' . $param['btSchool'] . '%');
-                        }
-                    })->count();
-
-            $data['data'] = DB::table('info_users')->where(function ($query) use ($param) {
-                        if ($param['btName']) {
-                            $query->where('name', 'like', '%' . $param['btName'] . '%');
-                        }
-                        if ($param['btNumber']) {
-                            $query->where('examineeNum', 'like', '%' . $param['btNumber'] . '%');
-                        }
-                        if ($param['btPhone']) {
-                            $query->where('identityNum', 'like', '%' . $param['btPhone'] . '%');
-                        }
-                        if ($param['btSchool']) {
-                            $query->where('applySchool', 'like', '%' . $param['btSchool'] . '%');
-                        }
-                    })
-                    ->skip($start)->take($length)
-                    ->orderBy($columns[$order[0]['column']]['data'], $order[0]['dir'])
-                    ->get();
-//            } else {
-//                $data['recordsFiltered'] = User::count();
-//                $data['data'] = User::
-//                        skip($start)->take($length)
-//                        ->orderBy($columns[$order[0]['column']]['data'], $order[0]['dir'])
-//                        ->get();
-//            }
+            $data = $this->info->selectAll($param, $start, $length, $columns, $order);
             return response()->json($data);
         }
         return view('admin.info.index');
@@ -218,22 +174,7 @@ class InfoController extends Controller {
     public function export(Request $request) {
         $param = Input::all();
         $dataArr = $data = [];
-        DB::setFetchMode(PDO::FETCH_ASSOC);
-        $data = DB::table('info_users')->where(function ($query) use ($param) {
-                    if (isset($param['btName'])) {
-                        $query->where('name', 'like', '%' . $param['btName'] . '%');
-                    }
-                    if (isset($param['btNumber'])) {
-                        $query->where('examineeNum', 'like', '%' . $param['btNumber'] . '%');
-                    }
-                    if (isset($param['btPhone'])) {
-                        $query->where('identityNum', 'like', '%' . $param['btPhone'] . '%');
-                    }
-                    if (isset($param['btSchool'])) {
-                        $query->where('applySchool', 'like', '%' . $param['btSchool'] . '%');
-                    }
-                })->get($this->fields);
-
+        $data = $this->info->export($param);
         foreach ($data as $k => $v) {
             $data[$k]['sex'] = $v['sex'] == 0 ? "男" : "女";
             $data[$k]['addPoints'] = $v['addPoints'] == 0 ? "不加分" : "加分";
@@ -252,7 +193,6 @@ class InfoController extends Controller {
             $i++;
             $dataArr[$i] = array_values($v);
         }
-//        print_r($dataArr);die;
         Excel::create(iconv('UTF-8', 'GBK', '信息管理'), function($excel) use ($dataArr) {
             $excel->sheet('score', function($sheet) use ($dataArr) {
                 $sheet->rows($dataArr);
@@ -264,21 +204,21 @@ class InfoController extends Controller {
      * 导入
      * @param Request $request
      */
-    public function import() {
-        $filePath = './public/信息管理.xls';
-        Excel::load($filePath, function($reader) {
+    public function import(Request $request) {
+        if ($request->hasFile('file')) {
+            // 获取后缀名
+            $ext = $request->file('file')->getClientOriginalExtension();
+            // 新的文件名
+            $newFile = time() . mt_rand(0, 9999) . "." . $ext;
+            // 上传文件操作
+            $request->file('file')->move('Uploads/', $newFile);
+        }
+        Excel::load("Uploads/" . $newFile, function($reader) use ($newFile) {
             $data = $reader->get()->toArray();
             unset($data[0]);
-//           dd($data);
-            $this->addAll($data);
-            
+            unlink("Uploads/" . $newFile);
+            $return = $this->info->addAll($data);
+            return response()->json($return);
         });
     }
-    private function addAll($data) {
-        foreach($data as $k=>$v){
-            $data[$k]=array_combine($this->fields, $v);
-        }
-        dd($data);
-    }
-
 }

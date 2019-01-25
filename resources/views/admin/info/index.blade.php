@@ -7,7 +7,13 @@
 @section('pageDesc','DashBoard')
 
 @section('content')
+<div id="acc_sc" style="display: none">
+    <form  id="formSubmit" class="reasonContent2" onsubmit="return false" action="#" method="post" enctype="multipart/form-data"> 
+        <input type="file" name="file" id="file" multiple class="ph08" />
+        <input type="submit"  id="submit" value="导入"/>
 
+    </form>
+</div>  
 <div class="row page-title-row" style="margin:5px;">
     <div class="col-md-6">
     </div>
@@ -90,18 +96,12 @@
                     </button>
                 </form>
             </div>
-            <div id="acc_sc">
-                <a href="javascript:;" class="tc acc_scicon">选择图片</a>
-                <input type="file" name="file" id="file" multiple class="ph08" />
-            </div>    
         </div>
         @stop
-
         @section('js')
         <script>
+            var indexColse;
             $(function () {
-
-
                 var table = $("#tags-table").DataTable({
                     "searching": false,
                     oLanguage: {
@@ -112,7 +112,6 @@
                         "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
                         "sInfoFiltered": "",
                         "sInfoPostFix": "",
-//                        "sSearch": "搜索:",
                         "sUrl": "",
                         "sEmptyTable": "表中数据为空",
                         "sLoadingRecords": "载入中...",
@@ -187,17 +186,37 @@
                     $('.deleteForm').attr('action', '/admin/info/' + id);
                     $("#modal-delete").modal();
                 });
+                $("#btnImport").click(function () {
+                    indexColse = layer.open({
+                        type: 1,
+                        title: '导入',
+                        shadeClose: true,
+                        shade: 0.6,
+                        area: ['500px', '90%'],
+                        content: $("#acc_sc") //"http://127.0.0.1:9501/addUser.html"
+                    });
 
+                })
+                $(document).on('click', '#submit', function () {
+                    var fd = new FormData(document.querySelector("#formSubmit"));
+                    $.ajax({
+                        //几个参数需要注意一下
+                        type: "POST", //方法类型
+                        url: "/admin/info/import", //url
+                        dataType: 'json',
+                        data: fd,
+                        processData: false, // 不处理数据
+                        contentType: false, // 不设置内容类型
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                        },
+                        success: function (result) {
+                            layer.close(indexColse);
+                            console.log(result);
+
+                        },
+                    });
+                })
             });
-            $("#btnImport").click(function () {
-                layer.open({
-                    type: 1,
-                    title: '用户注册',
-                    shadeClose: true,
-                    shade: 0.6,
-                    area: ['500px', '90%'],
-                    content: $("#acc_sc")
-                });
-            })
         </script>
         @stop

@@ -62,7 +62,7 @@ $router->group(['namespace' => 'Admin', 'middleware' => ['auth','authAdmin','men
     Route::post('admin/info/store', ['as' => 'admin.info.store', 'uses' => 'InfoController@store']); //添加
     
     Route::get('admin/info/export', ['as' => 'admin.info.export', 'uses' => 'InfoController@export']); //导出
-    Route::get('admin/info/import', ['as' => 'admin.info.import', 'uses' => 'InfoController@import']); //导入
+    Route::post('admin/info/import', ['as' => 'admin.info.import', 'uses' => 'InfoController@import']); //导入
     
 
 });
