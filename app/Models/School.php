@@ -107,5 +107,11 @@ class School extends Model {
         $info = School::find($id);
         return $info;
     }
+    /**
+     * 查询列表
+     */
+    public function getSelect(){
+       return $this->where(['status'=>1])->get(['id','name']);
+    }
 
 }
