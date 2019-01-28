@@ -47,7 +47,7 @@ $router->group(['namespace' => 'Admin', 'middleware' => ['auth','authAdmin','men
 
 
     //用户管理路由
-    Route::get('admin/user/manage', ['as' => 'admin.user.manage', 'uses' => 'UserController@index']);  //用户管理
+    Route::get('admin/user/index', ['as' => 'admin.user.manage', 'uses' => 'UserController@index']);  //用户管理
     Route::post('admin/user/index', ['as' => 'admin.user.index', 'uses' => 'UserController@index']);
     Route::resource('admin/user', 'UserController');
     Route::put('admin/user/update', ['as' => 'admin.user.edit', 'uses' => 'UserController@update']); //修改
@@ -56,14 +56,26 @@ $router->group(['namespace' => 'Admin', 'middleware' => ['auth','authAdmin','men
     //信息管理路由
     Route::get('admin/info/index', ['as' => 'admin.info.manage', 'uses' => 'InfoController@index']);  //用户管理
     Route::post('admin/info/index', ['as' => 'admin.info.index', 'uses' => 'InfoController@index']);
-//    Route::resource('admin/info', 'InfoController');
-    Route::put('admin/info/update', ['as' => 'admin.info.edit', 'uses' => 'InfoController@update']); //修改
+    Route::get('admin/info/export', ['as' => 'admin.info.export', 'uses' => 'InfoController@export']); //导出
+    Route::get('admin/info/detail', ['as' => 'admin.info.detail', 'uses' => 'InfoController@detail']); //查看
+    Route::post('admin/info/import', ['as' => 'admin.info.import', 'uses' => 'InfoController@import']); //导入
+    Route::resource('admin/info', 'InfoController');
+    Route::put('admin/info/update', ['as' => 'admin.info.update', 'uses' => 'InfoController@update']); //修改
+    Route::get('admin/info/edit', ['as' => 'admin.info.edit', 'uses' => 'InfoController@edit']); //修改
     Route::get('admin/info/create', ['as' => 'admin.info.create', 'uses' => 'InfoController@create']); //添加
     Route::post('admin/info/store', ['as' => 'admin.info.store', 'uses' => 'InfoController@store']); //添加
+
+      //院校管理路由
+    Route::get('admin/school/index', ['as' => 'admin.school.manage', 'uses' => 'SchoolController@index']);  //用户管理
+    Route::post('admin/school/index', ['as' => 'admin.school.index', 'uses' => 'SchoolController@index']);
+    Route::resource('admin/school', 'SchoolController');
+    Route::put('admin/school/update', ['as' => 'admin.school.edit', 'uses' => 'SchoolController@update']); //修改
+    Route::put('admin/school/edit', ['as' => 'admin.school.edit', 'uses' => 'SchoolController@edit']); //修改
+    Route::get('admin/school/create', ['as' => 'admin.school.create', 'uses' => 'SchoolController@create']); //添加
+    Route::post('admin/school/store', ['as' => 'admin.school.store', 'uses' => 'SchoolController@store']); //添加
     
-    Route::get('admin/info/export', ['as' => 'admin.info.export', 'uses' => 'InfoController@export']); //导出
-    Route::post('admin/info/import', ['as' => 'admin.info.import', 'uses' => 'InfoController@import']); //导入
-    
+    Route::get('admin/school/export', ['as' => 'admin.school.export', 'uses' => 'SchoolController@export']); //导出
+    Route::get('admin/school/import', ['as' => 'admin.school.import', 'uses' => 'SchoolController@import']); //导入
 
 });
 

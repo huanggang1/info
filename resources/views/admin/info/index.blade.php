@@ -39,13 +39,24 @@
 
             <div class="box-body">
                 <div style="margin-bottom:10px">
-                    考生号  : <input type="text"  name="number" id="btNumber" value="" autofocus>
-                    姓  名  :<input type="text"  name="name" id="btName" value="" autofocus>
-                    身份证号 :<input type="text"  name="phone"  id="btPhone" value="" autofocus>
-                    学 校 :<input type="text"  name="school"  id="btSchool" value="" autofocus>
+                    年 级  : <input type="text"   id="btGrade" value="" autofocus>
+                    姓 名  : <input type="text"   id="btName" value="" autofocus>
+                    手机号  : <input type="text"   id="btPhone" value="" autofocus>
+                    学校  :<input type="text"   id="btSchool" value="" autofocus><br/>
+                    核对地址 :<input type="text"    id="checkAddress" value="" autofocus>
+                    学 校 :<input type="text"    id="btSchool" value="" autofocus>
+<!--                    是否录取 :<select id="btnFullCost">
+                        <option value="-1">--请选择--</option>
+                        <option value="1">已录取</option>
+                        <option value="0">未录取</option> </select>-->
+                    是否全费 :<select id="btnFullCost">
+                        <option value="-1">--请选择--</option>
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+                    </select>
                     <button id="submitSearch">搜索</button>
                     <div class="box-header">
-                        <a class="btn btn-success" href="/admin/info/export">导出</a>
+                        <a class="btn btn-success" href="/admin/info/export" >导出</a>
                         <a class="btn btn-success" href="javasricpt:;" id="btnImport">导入</a>
                     </div>
                 </div>
@@ -56,7 +67,7 @@
                             <th class="hidden-sm">考生号</th>
                             <th class="hidden-sm">姓名</th>
                             <th class="hidden-md">身份证号</th>
-                            <th class="hidden-md">籍贯</th>
+                            <th class="hidden-md">报考专业</th>
                             <th class="hidden-md">报考院校</th>
                             <th class="hidden-md">手机号</th>
                             <th data-sortable="false">操作</th>
@@ -100,8 +111,9 @@
         @stop
         @section('js')
         <script>
-            var indexColse;
+            
             $(function () {
+                var indexColse;
                 var table = $("#tags-table").DataTable({
                     "searching": false,
                     oLanguage: {
@@ -137,7 +149,9 @@
                         },
                          data: function (d) {
                                                      d.btName = $("#btName").val();
-                                                     d.btNumber = $("#btNumber").val();
+                                                     d.btGrade = $("#btGrade").val();
+                                                     d.checkAddress = $("#checkAddress").val();
+                                                     d.btnFullCost = $("#btnFullCost").val();
                                                      d.btPhone = $("#btPhone").val();
                                                      d.btSchool = $("#btSchool").val();
                         },
@@ -147,7 +161,7 @@
                         {"data": "examineeNum"},
                         {"data": "name"},
                         {"data": "identityNum"},
-                        {"data": "nativePlace"},
+                        {"data": "applyProfession"},
                         {"data": "applySchool"},
                         {"data": "phone"},
                         {"data": "action"}
@@ -155,10 +169,9 @@
                     columnDefs: [
                         {
                             'targets': -1, "render": function (data, type, row) {
-                                var caozuo = '<a style="margin:3px;" href="/admin/info/' + row['id'] + '/edit" class="X-Small btn-xs text-success "><i class="fa fa-edit"></i> 编辑</a>';
-                                if (row['id'] != 1) {
-                                    caozuo += '<a style="margin:3px;" href="#" attr="' + row['id'] + '" class="delBtn X-Small btn-xs text-danger "><i class="fa fa-times-circle-o"></i> 删除</a>';
-                                }
+                                var caozuo = '<a style="margin:3px;" href="/admin/info/detail?id='+ row['id'] +'" class="X-Small btn-xs text-success "><i class="fa fa-street-view"></i> 查看</a>';
+                                caozuo += '<a style="margin:3px;" href="/admin/info/' + row['id'] + '/edit" class="X-Small btn-xs text-success "><i class="fa fa-edit"></i> 编辑</a>';
+                                caozuo += '<a style="margin:3px;" href="#" attr="' + row['id'] + '" class="delBtn X-Small btn-xs text-danger "><i class="fa fa-times-circle-o"></i> 删除</a>';
                                 return caozuo;
                             }
                         }
@@ -197,6 +210,17 @@
                     });
 
                 })
+                $("#btnExport").click(function () {
+                    $.ajax({
+                        //几个参数需要注意一下
+                        type: "GET", //方法类型
+                        url: "/admin/info/export", //url
+//                        dataType: 'json',
+                        //data: {"btName": $("#btName").val(), "btGrade": $("#btGrade").val(), 'btPhone': $("#btPhone").val(), 'btSchool': $("#btSchool").val(),"checkAddress":$("#checkAddress").val(),"btnFullCost":$("#btnFullCost").val()},
+                        processData: false, // 不处理数据
+                        contentType: false, // 不设置内容类型
+                    });
+                });
                 $(document).on('click', '#submit', function () {
                     var fd = new FormData(document.querySelector("#formSubmit"));
                     $.ajax({
@@ -211,8 +235,8 @@
                             'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
                         },
                         success: function (result) {
-                            layer.close(indexColse);
                             console.log(result);
+                            layer.close(indexColse);
 
                         },
                     });

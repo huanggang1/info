@@ -15,20 +15,24 @@
 
                 @include('admin.partials.errors')
                 @include('admin.partials.success')
-                <form class="form-horizontal" role="form" method="POST" action="/admin/user">
+                <form class="form-horizontal" role="form" method="POST" action="/admin/info/store">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">基本信息</h3>
                         </div>
-                        @include('admin.info._form')
+                        @include('admin.info._form_one')
                         <div class="panel-heading">
-                            <h3 class="panel-title">基本信息</h3>
+                            <h3 class="panel-title">报考信息</h3>
                         </div>
-                        @include('admin.info._form')
+                        @include('admin.info._form_two')
                         <div class="panel-heading">
-                            <h3 class="panel-title">基本信息</h3>
+                            <h3 class="panel-title">缴费信息</h3>
                         </div>
-                        @include('admin.info._form')
+                        @include('admin.info._form_tree')
+                         <div class="panel-heading">
+                            <h3 class="panel-title">负责人信息</h3>
+                        </div>
+                        @include('admin.info._form_four')
                         <div class="panel-body">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="cove_image"/>
