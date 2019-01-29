@@ -1,6 +1,6 @@
 @extends('admin.layouts.base')
 
-@section('title','编辑院校')
+@section('title','创建院校')
 
 @section('pageHeader','控制面板')
 
@@ -14,18 +14,16 @@
                 <div class="">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h3 class="panel-title">编辑学校</h3>
+                            <h3 class="panel-title">创建院校</h3>
                         </div>
                         <div class="panel-body">
 
                             @include('admin.partials.errors')
                             @include('admin.partials.success')
                             <form class="form-horizontal" role="form" method="POST"
-                                  action="/admin/school/update">
+                                  action="/admin/school/store">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                <input type="hidden" name="_method" value="PUT">
                                 @include('admin.school._form')
-                                <input type="hidden" name="id" value="{{ $data['id'] }}">
                                 <div class="form-group">
                                     <div class="col-md-7 col-md-offset-3">
                                         <button type="submit" class="btn btn-primary btn-md">

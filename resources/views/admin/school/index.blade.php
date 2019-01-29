@@ -1,13 +1,19 @@
 @extends('admin.layouts.base')
 
-@section('title','控制面板')
+@section('title','院校管理')
 
 @section('pageHeader','控制面板')
 
 @section('pageDesc','DashBoard')
 
 @section('content')
-
+<div id="acc_sc" style="display: none">
+    <form  id="formSubmit" class="reasonContent2" action="/admin/school/import" method="post" enctype="multipart/form-data"> 
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+        <input type="file" name="file" id="file" multiple class="ph08" />
+        <input type="submit"  id="submit" value="导入"/>
+    </form>
+</div>
 <div class="row page-title-row" style="margin:5px;">
     <div class="col-md-6">
     </div>
@@ -25,14 +31,23 @@
 
             @include('admin.partials.errors')
             @include('admin.partials.success')
+            <div class="row page-title-row" style="margin:5px;">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-6 text-right">
+                    <a href="/admin/school/create" class="btn btn-success btn-md">
+                        <i class="fa fa-plus-circle"></i> 添加信息
+                    </a>
+                </div>
+            </div>
             <div class="box-body">
-                学校名称: <input type="text"  name="schoolName" id="btName" value="" autofocus>
+                学校名称: <input type="text"  name="schoolName" id="btName" value="" autofocus onkeyup="this.value=this.value.replace(/\s+/g,'')">
 
                 <button id="submitSearch">搜索</button>
-                 <div class="box-header">
-                        <a class="btn btn-success" href="/admin/school/export">导出</a>
-                        <a class="btn btn-success" href="javasricpt:;" id="btnImport">导入</a>
-                    </div>
+                <div class="box-header">
+                    <a class="btn btn-success" id="btnExport">导出</a>
+                    <a class="btn btn-success" id="btnImport">导入</a>
+                </div>
                 <table id="tags-table" class="table table-bordered table-hover">
                     <thead>
                         <tr>
@@ -63,7 +78,7 @@
             <div class="modal-body">
                 <p class="lead">
                     <i class="fa fa-question-circle fa-lg"></i>
-                    确认要删除这个角色吗?
+                    确认要删除这个院校吗?
                 </p>
             </div>
             <div class="modal-footer">
@@ -141,6 +156,7 @@
                         }
                     ]
                 });
+//                table.fnClearTable(false);
                 $("#submitSearch").click(function () {
                     $("#tags-table").dataTable().fnDraw(false);
                 });
@@ -160,10 +176,25 @@
 
                 $("table").delegate('.delBtn', 'click', function () {
                     var id = $(this).attr('attr');
-                    $('.deleteForm').attr('action', '/admin/school/' + id);
+                    $('.deleteForm').attr('action', '/admin/school/delete/' + id);
                     $("#modal-delete").modal();
                 });
-
+                
+                //导入
+                $("#btnImport").bind("click",function(){
+                    indexColse = layer.open({
+                        type: 1,
+                        title: '导入',
+                        shadeClose: true,
+                        shade: 0.6,
+                        area: ['500px', '50%'],
+                        content: $("#acc_sc") //"http://127.0.0.1:9501/addUser.html"
+                    });
+                });
+                //导出
+                $('#btnExport').bind("click",function(){
+                    location.href='/admin/school/export?name='+$('input[name=schoolName]').val();
+                });
             });
         </script>
         @stop
