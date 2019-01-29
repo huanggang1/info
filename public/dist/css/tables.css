@@ -1,0 +1,12 @@
+.formWrap{
+    width: 800px;
+}
+.item{
+    display: inline-block;
+    margin: 10px 10px 10px 0;
+}
+.lable{
+    width: 80px;
+    display: inline-block;
+    text-align: right;
+}

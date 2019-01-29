@@ -37,9 +37,7 @@ class InfoController extends Controller {
             $order = $request->get('order');
             $columns = $request->get('columns');
             $param = Input::all();
-//            dd($param);
             $data = $this->info->selectAll($param, $start, $length, $columns, $order);
-//            dd($data);
             foreach ($data['data'] as $k => $v) {
                 $data['data'][$k]['applySchool'] = $this->school->getSchool($v['applySchool'])['name'];
             }
@@ -53,13 +51,11 @@ class InfoController extends Controller {
      * @return type
      */
     public function create(Request $request) {
-//        dd($request->route());
-        writeLog($request,"添加成功");
         $data = $this->school->getSelect();
-        foreach ($this->info->fields as  $v) {
+        foreach ($this->info->fields as $v) {
             $infoData[$v] = "";
         }
-        return view('admin.info.create')->with('data', $data)->with('infoData', $infoData)->with("readonly","");
+        return view('admin.info.create')->with('data', $data)->with('infoData', $infoData)->with("readonly", "");
     }
 
     /**
@@ -75,8 +71,10 @@ class InfoController extends Controller {
         }
         $return = $this->info->getAdd($data);
         if (isset($return)) {
+            writeLog($request, "添加失败");
             return redirect()->back()->withErrors('身份证或考生号或学号已存在');
         }
+        writeLog($request, "添加成功");
         return redirect('/admin/info/index')->withSuccess('添加成功！');
     }
 
@@ -88,7 +86,8 @@ class InfoController extends Controller {
     public function edit($id) {
         $schoolData = $this->school->getSelect();
         $infoData = $this->info->getFind($id);
-        return view('admin.info.edit')->with('data', $schoolData)->with('infoData', $infoData)->with("readonly","");;
+        return view('admin.info.edit')->with('data', $schoolData)->with('infoData', $infoData)->with("readonly", "");
+        ;
     }
 
     /**
@@ -103,22 +102,25 @@ class InfoController extends Controller {
         foreach ($this->info->fields as $k => $v) {
             $data[$v] = $param[$v];
         }
-        $return = $this->info->getSave($data,$id);
+        $return = $this->info->getSave($data, $id);
         if (isset($return)) {
+            writeLog($request, "修改失败");
             return redirect()->back()->withErrors('身份证或考生号或学号已存在');
         }
+        writeLog($request, "修改成功");
         return redirect('/admin/info/index')->withSuccess('修改成功！');
     }
+
     /**
      * 查看
      * @param type $id
      * @return type
      */
-    public function detail(Request $request){
-        $id=$request->get('id');
+    public function detail(Request $request) {
+        $id = $request->get('id');
         $schoolData = $this->school->getSelect();
         $infoData = $this->info->getFind($id);
-        return view('admin.info.detail')->with('data', $schoolData)->with('infoData', $infoData)->with("readonly","disabled");
+        return view('admin.info.detail')->with('data', $schoolData)->with('infoData', $infoData)->with("readonly", "disabled");
     }
 
     /**
@@ -126,23 +128,22 @@ class InfoController extends Controller {
      * @param type $id
      * @return type
      */
-    public function destroy($id) {
+    public function destroy(Request $request, $id) {
         $tag = $this->info->getDelete($id);
         if ($tag) {
+            writeLog($request, "删除成功");
             return redirect()->back()->withSuccess("删除成功");
         } else {
+            writeLog($request, "删除失败");
             return redirect()->back()->withErrors("删除失败");
-                            
         }
-
-        
     }
 
     /**
      * 导出
      * @param Request $request
      */
-    public function export() {
+    public function export(Request $request) {
         $param = Input::all();
         $dataArr = $data = [];
         $data = $this->info->export($param);
@@ -164,6 +165,7 @@ class InfoController extends Controller {
             $i++;
             $dataArr[$i] = array_values($v);
         }
+        writeLog($request, "导出信息管理操作");
         Excel::create(iconv('UTF-8', 'GBK', '信息管理'), function($excel) use ($dataArr) {
             $excel->sheet('score', function($sheet) use ($dataArr) {
                 $sheet->rows($dataArr);
@@ -184,6 +186,7 @@ class InfoController extends Controller {
             // 上传文件操作
             $request->file('file')->move('Uploads/', $newFile);
         }
+        writeLog($request, "导入信息管理操作");
         Excel::load("Uploads/" . $newFile, function($reader) use ($newFile) {
             $data = $reader->get()->toArray();
             unset($data[0]);

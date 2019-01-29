@@ -7,7 +7,13 @@
 @section('pageDesc','DashBoard')
 
 @section('content')
+<div id="acc_sc" style="display: none">
+    <form  id="formSubmit" class="reasonContent2" onsubmit="return false" action="#" method="post" enctype="multipart/form-data"> 
+        <input type="file" name="file" id="file" multiple class="ph08" />
+        <input type="submit"  id="submit" value="导入"/>
 
+    </form>
+</div>  
 <div class="row page-title-row" style="margin:5px;">
     <div class="col-md-6">
     </div>
@@ -31,18 +37,21 @@
             @include('admin.partials.errors')
             @include('admin.partials.success')
             <div class="box-body">
-                姓 名  : <input type="text"  name="name" id="btName" value="" autofocus>
-                邮 箱  :<input type="text"  name="email" id="btEmail" value="" autofocus>
-                手机号 :<input type="text"  name="phone"  id="btPhone" value="" autofocus>
-                <button id="submitSearch">搜索</button>
+                <label class="lable"  for="tag" style="margin-bottom: 20px">姓名：</label><input type="text"  name="name" id="btName" value="" autofocus>
+                <label class="lable"  for="tag" style="margin-bottom: 20px">邮箱：</label><input type="text"  name="email" id="btEmail" value="" autofocus>
+                <label class="lable"  for="tag" style="margin-bottom: 20px">手机号：</label><input type="text"  name="phone"  id="btPhone" value="" autofocus>
+                <button  class="btn btn-success" id="submitSearch" style="float: right;margin-right: 30px">搜索</button>
+                <div class="box-header">
+                    <a class="btn btn-success"  id="btnExport">导出</a>
+                    <a class="btn btn-success" id="btnImport">导入</a>
+                </div>
                 <table id="tags-table" class="table table-bordered table-hover">
                     <thead>
                         <tr>
                             <th data-sortable="false" class="hidden-sm"></th>
                             <th class="hidden-sm">用户名</th>
                             <th class="hidden-sm">邮箱</th>
-                            <th class="hidden-md">角色创建日期</th>
-                            <th class="hidden-md">角色修改日期</th>
+                            <th class="hidden-md">手机号</th>
                             <th data-sortable="false">操作</th>
                         </tr>
                     </thead>
@@ -67,7 +76,7 @@
             <div class="modal-body">
                 <p class="lead">
                     <i class="fa fa-question-circle fa-lg"></i>
-                    确认要删除这个角色吗?
+                    确认要删除这个用户吗?
                 </p>
             </div>
             <div class="modal-footer">
@@ -91,15 +100,14 @@
 
                 var table = $("#tags-table").DataTable({
 //                    "bFilter": false,
-                    "searching" : false,
-                    
+                    "searching": false,
                     oLanguage: {
                         "sProcessing": "处理中...",
                         "sLengthMenu": "显示 _MENU_ 项结果",
                         "sZeroRecords": "没有匹配结果",
                         "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
                         "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
-                        "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                        "sInfoFiltered": "",
                         "sInfoPostFix": "",
 //                        "sSearch": "搜索:",
                         "sUrl": "",
@@ -124,20 +132,25 @@
                         type: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
-                        }
+                        },
+                         data: function (d) {
+                                                     d.btName = $("#btName").val();
+                                                     d.btPhone = $("#btPhone").val();
+                                                     d.btEmail = $("#btEmail").val();
+                        },
                     },
                     "columns": [
                         {"data": "id"},
                         {"data": "name"},
                         {"data": "email"},
-                        {"data": "created_at"},
-                        {"data": "updated_at"},
+                        {"data": "phone"},
                         {"data": "action"}
                     ],
                     columnDefs: [
                         {
                             'targets': -1, "render": function (data, type, row) {
-                                var caozuo = '<a style="margin:3px;" href="/admin/user/' + row['id'] + '/edit" class="X-Small btn-xs text-success "><i class="fa fa-edit"></i> 编辑</a>';
+                                 var caozuo = '<a style="margin:3px;" href="/admin/user/detail?id=' + row['id'] + '" class="X-Small btn-xs text-success "><i class="fa fa-street-view"></i> 查看</a>';
+                                caozuo += '<a style="margin:3px;" href="/admin/user/' + row['id'] + '/edit" class="X-Small btn-xs text-success "><i class="fa fa-edit"></i> 编辑</a>';
                                 if (row['id'] != 1) {
                                     caozuo += '<a style="margin:3px;" href="#" attr="' + row['id'] + '" class="delBtn X-Small btn-xs text-danger "><i class="fa fa-times-circle-o"></i> 删除</a>';
                                 }
@@ -146,7 +159,9 @@
                         }
                     ]
                 });
-                table.fnClearTable(false);
+                $("#submitSearch").click(function () {
+                    $("#tags-table").dataTable().fnDraw(false);
+                });
                 table.on('preXhr.dt', function () {
                     loadShow();
                 });
@@ -166,6 +181,50 @@
                     $('.deleteForm').attr('action', '/admin/user/' + id);
                     $("#modal-delete").modal();
                 });
+                $("#btnImport").click(function () {
+                    indexColse = layer.open({
+                        type: 1,
+                        title: '导入',
+                        shadeClose: true,
+                        shade: 0.6,
+                        area: ['500px', '90%'],
+                        content: $("#acc_sc") //"http://127.0.0.1:9501/addUser.html"
+                    });
+                })
+                $("#btnExport").click(function () {
+                    var btName = $("#btName").val();
+                    var btPhone = $("#btPhone").val();
+                    var btEmail = $("#btEmail").val();
+                    location.href = "/admin/user/export?btName=" + btName + "&btEmail=" + btEmail + "&btPhone=" + btPhone;
+                });
+                $(document).on('click', '#submit', function () {
+                    var fd = new FormData(document.querySelector("#formSubmit"));
+                    $.ajax({
+                        //几个参数需要注意一下
+                        type: "POST", //方法类型
+                        url: "/admin/user/import", //url
+                        dataType: 'json',
+                        data: fd,
+                        processData: false, // 不处理数据
+                        contentType: false, // 不设置内容类型
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                        },
+                        success: function (result) {
+                            console.log(result);
+                            layer.close(indexColse);
+//                            layer.open({
+//                                type: 1,
+//                                title: '导入',
+//                                shadeClose: true,
+//                                shade: 0.6,
+//                                area: ['500px', '90%'],
+//                                content: result //"http://127.0.0.1:9501/addUser.html"
+//                            });
+//                           
+                        },
+                    });
+                })
 
             });
         </script>

@@ -39,22 +39,22 @@
 
             <div class="box-body">
                 <div style="margin-bottom:10px">
-                    年 级  : <input type="text"   id="btGrade" value="" autofocus>
-                    姓 名  : <input type="text"   id="btName" value="" autofocus>
-                    手机号  : <input type="text"   id="btPhone" value="" autofocus>
-                    学校  :<input type="text"   id="btSchool" value="" autofocus><br/>
-                    核对地址 :<input type="text"    id="checkAddress" value="" autofocus>
-                    学 校 :<input type="text"    id="btSchool" value="" autofocus>
+                    <label class="lable"  for="tag" style="margin-bottom: 20px">年级：</label><input type="text"   id="btGrade" value="" autofocus>
+                    <label class="lable"  for="tag" >姓名：</label><input type="text"   id="btName" value="" autofocus>
+                    <label class="lable"  for="tag" >手机号：</label> <input type="text"   id="btPhone" value="" autofocus><br/>
+                    <label class="lable"  for="tag" >学校：</label><input type="text"   id="btSchool" value="" autofocus>
+                    <label class="lable"  for="tag" >核对地址：</label><input type="text"    id="checkAddress" value="" autofocus>
+                    <!--<label class="lable"  for="tag" >年级：</label><input type="text"    id="btSchool" value="" autofocus>-->
 <!--                    是否录取 :<select id="btnFullCost">
                         <option value="-1">--请选择--</option>
                         <option value="1">已录取</option>
                         <option value="0">未录取</option> </select>-->
-                    是否全费 :<select id="btnFullCost">
+                    <label class="lable"  for="tag" >是否全费：</label> :<select id="btnFullCost">
                         <option value="-1">--请选择--</option>
                         <option value="1">是</option>
                         <option value="0">否</option>
                     </select>
-                    <button id="submitSearch">搜索</button>
+                    <button class="btn btn-success"  id="submitSearch"style="float: right;margin-right: 30px">搜索</button>
                     <div class="box-header">
                         <a class="btn btn-success"  id="btnExport">导出</a>
                         <a class="btn btn-success" id="btnImport">导入</a>
@@ -112,6 +112,7 @@
         @section('js')
         <script>
             $(function () {
+
                 var indexColse;
                 var table = $("#tags-table").DataTable({
                     "searching": false,
@@ -155,7 +156,6 @@
                                                      d.btSchool = $("#btSchool").val();
                         },
                     },
-                    
                     "columns": [
                         {"data": "id"},
                         {"data": "examineeNum"},
@@ -177,24 +177,21 @@
                         }
                     ]
                 });
-                table.fnClearTable(false);
                 $("#submitSearch").click(function () {
                     $("#tags-table").dataTable().fnDraw(false);
                 });
+//                table.fnClearTable(false);
                 table.on('preXhr.dt', function () {
                     loadShow();
                 });
-
                 table.on('draw.dt', function () {
                     loadFadeOut();
                 });
-
                 table.on('order.dt search.dt', function () {
                     table.column(0, {search: 'applied', order: 'applied'}).nodes().each(function (cell, i) {
                         cell.innerHTML = i + 1;
                     });
                 }).draw();
-                
                 $("table").delegate('.delBtn', 'click', function () {
                     var id = $(this).attr('attr');
                     $('.deleteForm').attr('action', '/admin/info/' + id);
@@ -209,7 +206,6 @@
                         area: ['500px', '90%'],
                         content: $("#acc_sc") //"http://127.0.0.1:9501/addUser.html"
                     });
-
                 })
                 $("#btnExport").click(function () {
                     var btName = $("#btName").val();
@@ -236,7 +232,6 @@
                         success: function (result) {
                             console.log(result);
                             layer.close(indexColse);
-
 //                            layer.open({
 //                                type: 1,
 //                                title: '导入',

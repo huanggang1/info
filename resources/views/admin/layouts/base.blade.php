@@ -39,6 +39,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
   {{--loding--}}
   <link href="/dist/css/load/load.css" rel="stylesheet">
+  <link href="/dist/css/tables.css" rel="stylesheet">
 
 </head>
 <!--
@@ -202,7 +203,7 @@ desired effect
 <script src="/plugins/datatables/dataTables.bootstrap.js"></script>
 <script src="/dist/js/common.js"></script>
 <script src="/dist/js/layer/layer.js"></script>
-
+<script src="/dist/js/DatePicker/WdatePicker.js"></script>
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. Slimscroll is required when using the
