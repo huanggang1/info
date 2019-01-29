@@ -146,13 +146,7 @@
                         }
                     ]
                 });
-                $("#submitSearch").click(function () {
-                    var args1 = $("#btName").val();
-                    var args2 = $("#btEmail").val();
-                    var args3 = $("#btPhone").val();
-//                    table.search(args1 + " " + args2 + " " + args3).draw();//
-                    table.fnDraw();
-                });
+                table.fnClearTable(false);
                 table.on('preXhr.dt', function () {
                     loadShow();
                 });

@@ -8,7 +8,7 @@ use PDO;
 use Validator;
 
 class Info extends Model {
-
+    public $timestamps = true;
     protected $table = 'info_users';
     public $fields = [
         'name', 'sex', 'nation', 'politicalStatus', 'identityNum', 'workUnit',
@@ -19,9 +19,9 @@ class Info extends Model {
         'yearOne', 'yearTwo', 'yearTree', 'costFieldsTwo', 'person', 'introducer', 'remarks'
     ];
     protected $rules = [
-        'identityNum' => 'required|unique:info_users,identityNum,status,1',
-        'examineeNum' => 'required|unique:info_users,examineeNum,status,1',
-        'studentNum' => 'required|unique:info_users,studentNum,status,1',
+        'identityNum' => "required|unique:info_users,identityNum,2,status",
+        'examineeNum' => "required|unique:info_users,examineeNum,2,status",
+        'studentNum' => "required|unique:info_users,studentNum,2,status",
     ];
     protected $messages = [
         'identityNum.unique' => '身份证号已存在',
@@ -97,13 +97,26 @@ class Info extends Model {
      */
     public function addAll($data) {
         $dataError = [];
-        $i = 0;
         foreach ($data as $k => $v) {
             $arr = array_combine($this->fields, $v);
-            $dataError[$i] = $this->getAdd($arr, $i);
-            $i++;
+            $schoolId = $this->schoolSelect($arr['applySchool']);
+            if (!$schoolId) {
+                $dataError[$k] = $arr;
+                continue;
+            }
+            $arr['applySchool'] = $schoolId;
+            $dataError[$k] = $this->getAdd($arr);
         }
         return $dataError;
+    }
+
+    public function schoolSelect($applySchool) {
+        DB::setFetchMode(PDO::FETCH_ASSOC);
+        $data = DB::table('school')->where(['name' => $applySchool])->first();
+        if($data['id']){
+            return $data['id'];
+        }
+        return false;
     }
 
     /**
@@ -117,7 +130,8 @@ class Info extends Model {
         if ($validator->fails()) {
             return $data;
         } else {
-            DB::table('info_users')->insertGetId($data);
+            $data['created_at']=date('Y-m-d H:i:s');
+            DB::table('info_users')->insert($data);
         }
     }
 
@@ -129,14 +143,14 @@ class Info extends Model {
     public function getSave($data, $id) {
         //验证唯一性 排除本身
         $rules = [
-            'identityNum' => 'required|unique:info_users,identityNum,' . $id . ',status,0',
-            'examineeNum' => 'required|unique:info_users,examineeNum,' . $id . ',status,0',
-            'studentNum' => 'required|unique:info_users,studentNum,' . $id . ',status,0',
+            'identityNum' => 'required|unique:info_users,identityNum,' . $id . ',id,status,1',
+            'examineeNum' => 'required|unique:info_users,examineeNum,' . $id . ',id,status,1',
+            'studentNum' => 'required|unique:info_users,studentNum,' . $id . ',id,status,1',
         ];
         $validator = Validator::make($data, $rules, $this->messages);
         $dataArr = $this->getFind($id);
         if ($validator->fails()) {
-            return true;
+            return $validator->errors()->getMessages();
         }
         $this->where(['id' => $id])->update($data);
     }
@@ -155,7 +169,7 @@ class Info extends Model {
      * @return type
      */
     public function getDelete($id) {
-        return $this->where(['id' => $id])->update(['status' => 0]);
+        return $this->where(['id' => $id])->update(['status' => 2]);
     }
 
 }

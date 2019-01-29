@@ -56,8 +56,8 @@
                     </select>
                     <button id="submitSearch">搜索</button>
                     <div class="box-header">
-                        <a class="btn btn-success" href="/admin/info/export" >导出</a>
-                        <a class="btn btn-success" href="javasricpt:;" id="btnImport">导入</a>
+                        <a class="btn btn-success"  id="btnExport">导出</a>
+                        <a class="btn btn-success" id="btnImport">导入</a>
                     </div>
                 </div>
                 <table id="tags-table" class="table table-bordered table-hover">
@@ -111,7 +111,6 @@
         @stop
         @section('js')
         <script>
-            
             $(function () {
                 var indexColse;
                 var table = $("#tags-table").DataTable({
@@ -156,6 +155,7 @@
                                                      d.btSchool = $("#btSchool").val();
                         },
                     },
+                    
                     "columns": [
                         {"data": "id"},
                         {"data": "examineeNum"},
@@ -169,7 +169,7 @@
                     columnDefs: [
                         {
                             'targets': -1, "render": function (data, type, row) {
-                                var caozuo = '<a style="margin:3px;" href="/admin/info/detail?id='+ row['id'] +'" class="X-Small btn-xs text-success "><i class="fa fa-street-view"></i> 查看</a>';
+                                var caozuo = '<a style="margin:3px;" href="/admin/info/detail?id=' + row['id'] + '" class="X-Small btn-xs text-success "><i class="fa fa-street-view"></i> 查看</a>';
                                 caozuo += '<a style="margin:3px;" href="/admin/info/' + row['id'] + '/edit" class="X-Small btn-xs text-success "><i class="fa fa-edit"></i> 编辑</a>';
                                 caozuo += '<a style="margin:3px;" href="#" attr="' + row['id'] + '" class="delBtn X-Small btn-xs text-danger "><i class="fa fa-times-circle-o"></i> 删除</a>';
                                 return caozuo;
@@ -177,6 +177,7 @@
                         }
                     ]
                 });
+                table.fnClearTable(false);
                 $("#submitSearch").click(function () {
                     $("#tags-table").dataTable().fnDraw(false);
                 });
@@ -193,7 +194,7 @@
                         cell.innerHTML = i + 1;
                     });
                 }).draw();
-
+                
                 $("table").delegate('.delBtn', 'click', function () {
                     var id = $(this).attr('attr');
                     $('.deleteForm').attr('action', '/admin/info/' + id);
@@ -211,15 +212,13 @@
 
                 })
                 $("#btnExport").click(function () {
-                    $.ajax({
-                        //几个参数需要注意一下
-                        type: "GET", //方法类型
-                        url: "/admin/info/export", //url
-//                        dataType: 'json',
-                        //data: {"btName": $("#btName").val(), "btGrade": $("#btGrade").val(), 'btPhone': $("#btPhone").val(), 'btSchool': $("#btSchool").val(),"checkAddress":$("#checkAddress").val(),"btnFullCost":$("#btnFullCost").val()},
-                        processData: false, // 不处理数据
-                        contentType: false, // 不设置内容类型
-                    });
+                    var btName = $("#btName").val();
+                    var btGrade = $("#btGrade").val();
+                    var checkAddress = $("#checkAddress").val();
+                    var btnFullCost = $("#btnFullCost").val();
+                    var btPhone = $("#btPhone").val();
+                    var btSchool = $("#btSchool").val();
+                    location.href = "/admin/info/export?btName=" + btName + "&btGrade=" + btGrade + "&checkAddress=" + checkAddress + "&btnFullCost=" + btnFullCost + "&btPhone=" + btPhone + "&btSchool=" + btSchool;
                 });
                 $(document).on('click', '#submit', function () {
                     var fd = new FormData(document.querySelector("#formSubmit"));
@@ -237,6 +236,16 @@
                         success: function (result) {
                             console.log(result);
                             layer.close(indexColse);
+
+//                            layer.open({
+//                                type: 1,
+//                                title: '导入',
+//                                shadeClose: true,
+//                                shade: 0.6,
+//                                area: ['500px', '90%'],
+//                                content: result //"http://127.0.0.1:9501/addUser.html"
+//                            });
+//                           
 
                         },
                     });

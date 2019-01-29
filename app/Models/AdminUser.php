@@ -59,8 +59,6 @@ class AdminUser extends Authenticatable
         if(Auth::guard('admin')->user()->id===1){
             return true;
         }
-//        dd(123);
-//        dd($permission);
         if (is_array($permission)) {
             foreach ($permission as $permName) {
                 $hasPerm = $this->can($permName);
@@ -71,18 +69,10 @@ class AdminUser extends Authenticatable
                     return false;
                 }
             }
-
-            // If we've made it this far and $requireAll is FALSE, then NONE of the perms were found
-            // If we've made it this far and $requireAll is TRUE, then ALL of the perms were found.
-            // Return the value of $requireAll;
             return $requireAll;
         } else {
-//            echo "<pre>";
-//            print_r($this->cachedRoles());die;
             foreach ($this->cachedRoles() as $role) {
-                // Validate against the Permission table
                 foreach ($role->cachedPermissions() as $perm) {
-//                    print_R($perm->name);ECHO PHP_EOL;
                     if (str_is( $permission, $perm->name) ) {
                         return true;
                     }

@@ -52,12 +52,14 @@ class InfoController extends Controller {
      * 添加列表展示
      * @return type
      */
-    public function create() {
+    public function create(Request $request) {
+//        dd($request->route());
+        writeLog($request,"添加成功");
         $data = $this->school->getSelect();
         foreach ($this->info->fields as  $v) {
             $infoData[$v] = "";
         }
-        return view('admin.info.create')->with('data', $data)->with('infoData', $infoData)->with("readonly","readonly");
+        return view('admin.info.create')->with('data', $data)->with('infoData', $infoData)->with("readonly","");
     }
 
     /**

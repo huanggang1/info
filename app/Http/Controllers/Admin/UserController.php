@@ -13,6 +13,7 @@ class UserController extends Controller {
     protected $fields = [
         'name' => '',
         'email' => '',
+        'phone' => '',
         'roles' => [],
     ];
 
