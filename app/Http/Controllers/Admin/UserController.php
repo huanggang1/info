@@ -57,7 +57,8 @@ class UserController extends Controller {
             $data[$field] = old($field, $default);
         }
         $data['rolesAll'] = Role::all()->toArray();
-        return view('admin.user.create', $data)->with("readonly", "");;
+        return view('admin.user.create', $data)->with("readonly", "");
+        ;
     }
 
     /**
@@ -73,6 +74,7 @@ class UserController extends Controller {
         if ($request->get('password') != '' && $request->get('repassword') != '' && $request->get('password') == $request->get('repassword')) {
             $user->password = bcrypt($request->get('password'));
         } else {
+            writeLog($request, "用户“ " . $user->name . " ”添加失败");
             return redirect()->back()->withErrors('密码或确认密码不能为空！');
         }
         unset($user->roles);
@@ -80,6 +82,7 @@ class UserController extends Controller {
         if (is_array($request->get('roles'))) {
             $user->giveRoleTo($request->get('roles'));
         }
+        writeLog($request, "用户“ " . $user->name . " ”添加成功");
         return redirect('/admin/user')->withSuccess('添加成功！');
     }
 
@@ -104,7 +107,8 @@ class UserController extends Controller {
         }
         $data['rolesAll'] = Role::all()->toArray();
         $data['id'] = (int) $id;
-        return view('admin.user.edit', $data)->with("readonly", "");;
+        return view('admin.user.edit', $data)->with("readonly", "");
+        ;
     }
 
     /**
@@ -122,14 +126,18 @@ class UserController extends Controller {
             if ($request->get('password') != '' && $request->get('repassword') != '' && $request->get('password') == $request->get('repassword')) {
                 $user->password = bcrypt($request->get('password'));
             } else {
+                writeLog($request, "用户“ " . $user->name . " ”修改失败");
                 return redirect()->back()->withErrors('修改密码时,密码或确认密码不能为空！');
             }
         }
         unset($user->roles);
         $user->giveRoleTo($request->get('roles', []));
-        return redirect('/admin/user')->withSuccess('添加成功！');
+        $user->save();
+        writeLog($request, "用户“ " . $user->name . " ”修改成功");
+        return redirect('/admin/user')->withSuccess('修改成功！');
     }
-     /**
+
+    /**
      * 查看
      * @param type $id
      * @return type
@@ -153,6 +161,7 @@ class UserController extends Controller {
         $data['id'] = (int) $id;
         return view('admin.user.edit', $data)->with("readonly", "disabled");
     }
+
     /**
      * 用户删除
      * @param Request $request
@@ -163,11 +172,11 @@ class UserController extends Controller {
         $tag = User::find((int) $id);
         if ($tag && $tag->id != 1) {
             if ($this->user->getDelete($id)) {
-                writeLog($request, "删除成功");
+                writeLog($request, "用户“ " . $tag->name . " ”删除成功");
                 return redirect()->back()->withSuccess("删除成功");
             }
         }
-        writeLog($request, "删除失败");
+        writeLog($request, "用户“ " . $tag->name . " ”删除失败");
         return redirect()->back()->withErrors("删除失败");
     }
 
@@ -194,6 +203,36 @@ class UserController extends Controller {
                 $sheet->rows($dataArr);
             });
         })->export('xls');
+    }
+
+    /**
+     * 导入
+     * @param Request $request
+     */
+    public function import(Request $request) {
+        $return = [];
+        if ($request->hasFile('file')) {
+            // 获取后缀名
+            $ext = $request->file('file')->getClientOriginalExtension();
+            // 新的文件名
+            $newFile = time() . mt_rand(0, 9999) . "." . $ext;
+            // 上传文件操作
+            $request->file('file')->move('Uploads/', $newFile);
+        }
+        writeLog($request, "导入用户管理操作");
+        Excel::load("Uploads/" . $newFile, function($reader) use ($newFile, &$return) {
+            $data = $reader->get()->toArray();
+            unset($data[0]);
+            unlink("Uploads/" . $newFile);
+            $return = $this->user->addAll($data);
+        });
+        if ($return['code'] == 1) {
+            writeLog($request, $return['msg']);
+            return redirect('admin/info/index')->withSuccess($return['msg']);
+        } else {
+            writeLog($request, $return['msg']);
+            return redirect()->back()->withErrors($return['msg']);
+        }
     }
 
 }

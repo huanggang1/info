@@ -110,7 +110,7 @@
                         },
                     },
                     "columns": [
-                        {"data": "id"},
+                        {"data": "key"},
                         {"data": "moudleName"},
                         {"data": "name"},
                         {"data": "log_content"},

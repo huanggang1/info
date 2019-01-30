@@ -33,15 +33,18 @@ class OperationLog extends Model {
     public function selectAll($param, $start, $length, $columns, $order) {
         $data['recordsFiltered'] = $this->where(function ($query) use ($param) {
                     $this->getWhere($param, $query);
-                })->join('admin_users', 'userId', '=', 'admin_users.id')->count();
-                        
+                })->count();
+
         $data['data'] = $this->where(function ($query) use ($param) {
                     $this->getWhere($param, $query);
                 })
-                ->join('admin_users', 'userId', '=', 'admin_users.id')
                 ->skip($start)->take($length)
                 ->orderBy($columns[$order[0]['column']]['data'], $order[0]['dir'])
                 ->get();
+        foreach ($data['data'] as $k => $v) {
+            $data['data'][$k]['name'] = $this->getUser($v['userId'])['name'];
+            $data['data'][$k]['key'] = $k + 1;
+        }
         return $data;
     }
 
@@ -52,10 +55,16 @@ class OperationLog extends Model {
      */
     private function getWhere($param, $query) {
         if (isset($param['startTime']) && !empty($param['startTime'])) {
-            $query->whereDate('created_at', ">=", $param['startTime']);
+            $query->whereDate('operation_log.created_at', ">=", $param['startTime']);
         }
         if (isset($param['endTime']) && !empty($param['endTime'])) {
-            $query->whereDate('created_at', "<=", $param['endTime']);
+            $query->whereDate('operation_log.created_at', "<=", $param['endTime']);
         }
     }
+
+    public function getUser($id) {
+        DB::setFetchMode(PDO::FETCH_ASSOC);
+        return DB::table('admin_users')->where(['id' => $id])->first();
+    }
+
 }

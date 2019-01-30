@@ -8,9 +8,11 @@
 
 @section('content')
 <div id="acc_sc" style="display: none">
-    <form  id="formSubmit" class="reasonContent2" onsubmit="return false" action="#" method="post" enctype="multipart/form-data"> 
+    <form  id="formSubmit" class="reasonContent2" action="/admin/info/import" method="post" enctype="multipart/form-data"> 
         <input type="file" name="file" id="file" multiple class="ph08" />
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
         <input type="submit"  id="submit" value="导入"/>
+        
 
     </form>
 </div>  
@@ -157,7 +159,7 @@
                         },
                     },
                     "columns": [
-                        {"data": "id"},
+                        {"data": "key"},
                         {"data": "examineeNum"},
                         {"data": "name"},
                         {"data": "identityNum"},
@@ -216,35 +218,6 @@
                     var btSchool = $("#btSchool").val();
                     location.href = "/admin/info/export?btName=" + btName + "&btGrade=" + btGrade + "&checkAddress=" + checkAddress + "&btnFullCost=" + btnFullCost + "&btPhone=" + btPhone + "&btSchool=" + btSchool;
                 });
-                $(document).on('click', '#submit', function () {
-                    var fd = new FormData(document.querySelector("#formSubmit"));
-                    $.ajax({
-                        //几个参数需要注意一下
-                        type: "POST", //方法类型
-                        url: "/admin/info/import", //url
-                        dataType: 'json',
-                        data: fd,
-                        processData: false, // 不处理数据
-                        contentType: false, // 不设置内容类型
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
-                        },
-                        success: function (result) {
-                            console.log(result);
-                            layer.close(indexColse);
-//                            layer.open({
-//                                type: 1,
-//                                title: '导入',
-//                                shadeClose: true,
-//                                shade: 0.6,
-//                                area: ['500px', '90%'],
-//                                content: result //"http://127.0.0.1:9501/addUser.html"
-//                            });
-//                           
-
-                        },
-                    });
-                })
             });
         </script>
         @stop

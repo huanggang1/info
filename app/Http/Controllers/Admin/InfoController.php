@@ -40,6 +40,7 @@ class InfoController extends Controller {
             $data = $this->info->selectAll($param, $start, $length, $columns, $order);
             foreach ($data['data'] as $k => $v) {
                 $data['data'][$k]['applySchool'] = $this->school->getSchool($v['applySchool'])['name'];
+                $data['data'][$k]['key'] = $k + 1;
             }
             return response()->json($data);
         }
@@ -71,10 +72,10 @@ class InfoController extends Controller {
         }
         $return = $this->info->getAdd($data);
         if (isset($return)) {
-            writeLog($request, "添加失败");
+            writeLog($request, "考生号“ " . $data['examineeNum'] . " ”添加失败");
             return redirect()->back()->withErrors('身份证或考生号或学号已存在');
         }
-        writeLog($request, "添加成功");
+        writeLog($request, "考生号“ " . $data['examineeNum'] . " ”添加成功");
         return redirect('/admin/info/index')->withSuccess('添加成功！');
     }
 
@@ -104,10 +105,10 @@ class InfoController extends Controller {
         }
         $return = $this->info->getSave($data, $id);
         if (isset($return)) {
-            writeLog($request, "修改失败");
+            writeLog($request, "考生号“ " . $data['examineeNum'] . " ”修改失败");
             return redirect()->back()->withErrors('身份证或考生号或学号已存在');
         }
-        writeLog($request, "修改成功");
+        writeLog($request, "考生号“ " . $data['examineeNum'] . " ”修改成功");
         return redirect('/admin/info/index')->withSuccess('修改成功！');
     }
 
@@ -129,12 +130,13 @@ class InfoController extends Controller {
      * @return type
      */
     public function destroy(Request $request, $id) {
+        $data = $this->info->getFind($id);
         $tag = $this->info->getDelete($id);
         if ($tag) {
-            writeLog($request, "删除成功");
+            writeLog($request, "考生号“ " . $data['examineeNum'] . " ”删除成功");
             return redirect()->back()->withSuccess("删除成功");
         } else {
-            writeLog($request, "删除失败");
+            writeLog($request, "考生号“ " . $data['examineeNum'] . " ”删除失败");
             return redirect()->back()->withErrors("删除失败");
         }
     }
@@ -178,6 +180,7 @@ class InfoController extends Controller {
      * @param Request $request
      */
     public function import(Request $request) {
+        $return = [];
         if ($request->hasFile('file')) {
             // 获取后缀名
             $ext = $request->file('file')->getClientOriginalExtension();
@@ -186,14 +189,21 @@ class InfoController extends Controller {
             // 上传文件操作
             $request->file('file')->move('Uploads/', $newFile);
         }
-        writeLog($request, "导入信息管理操作");
-        Excel::load("Uploads/" . $newFile, function($reader) use ($newFile) {
+
+        Excel::load("Uploads/" . $newFile, function($reader) use ($newFile, &$return) {
             $data = $reader->get()->toArray();
             unset($data[0]);
             unlink("Uploads/" . $newFile);
             $return = $this->info->addAll($data);
-            echo json_encode($return);
+//            echo json_encode($return);
         });
+        if ($return['code'] == 1) {
+            writeLog($request, $return['msg']);
+            return redirect('admin/info/index')->withSuccess($return['msg']);
+        } else {
+            writeLog($request, $return['msg']);
+            return redirect()->back()->withErrors($return['msg']);
+        }
     }
 
 }

@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use DB;
 use PDO;
 use Validator;
+use Auth;
 
 class Info extends Model {
+
     public $timestamps = true;
     protected $table = 'info_users';
     public $fields = [
@@ -76,6 +78,9 @@ class Info extends Model {
             $query->where(['fullCost' => $param['btnFullCost']]);
         }
         $query->where(['status' => 1]);
+        if (Auth::guard('admin')->user()->id != 1) {
+            $query->where(['uid' => Auth::guard('admin')->user()->id]);
+        }
     }
 
     /**
@@ -98,22 +103,30 @@ class Info extends Model {
     public function addAll($data) {
         $dataError = [];
         foreach ($data as $k => $v) {
+            if (count($this->fields) != count($v)) {
+                return ['code' => 0, 'msg' => "导入信息模板错误"];
+                continue;
+            }
             $arr = array_combine($this->fields, $v);
             $schoolId = $this->schoolSelect($arr['applySchool']);
             if (!$schoolId) {
-                $dataError[$k] = $arr;
+                $dataError[$k] = $arr['examineeNum'];
                 continue;
             }
             $arr['applySchool'] = $schoolId;
+            $arr['uid'] = Auth::guard('admin')->user()->id;
             $dataError[$k] = $this->getAdd($arr);
         }
-        return $dataError;
+        if (count($dataError) > 0) {
+            return ['code' => 0, 'msg' => "导入信息考生号“ " . implode(',', $dataError) . " ”失败"];
+        }
+        return ['code' => 1, 'msg' => "导入成功"];
     }
 
     public function schoolSelect($applySchool) {
         DB::setFetchMode(PDO::FETCH_ASSOC);
         $data = DB::table('school')->where(['name' => $applySchool])->first();
-        if($data['id']){
+        if ($data['id']) {
             return $data['id'];
         }
         return false;
@@ -128,9 +141,10 @@ class Info extends Model {
         //验证唯一性
         $validator = Validator::make($data, $this->rules, $this->messages);
         if ($validator->fails()) {
-            return $data;
+            return $data['examineeNum'];
         } else {
-            $data['created_at']=date('Y-m-d H:i:s');
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $data['uid'] = Auth::guard('admin')->user()->id;
             DB::table('info_users')->insert($data);
         }
     }
@@ -160,7 +174,7 @@ class Info extends Model {
      * @param type $id
      */
     public function getFind($id) {
-        return $this->where(['id' => $id])->first();
+        return Info::find($id);
     }
 
     /**

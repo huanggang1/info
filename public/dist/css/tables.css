@@ -10,3 +10,6 @@
     display: inline-block;
     text-align: right;
 }
+.input-text{
+    width: 50px;
+}

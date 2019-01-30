@@ -8,18 +8,17 @@ use PDO;
 use Validator;
 
 class User extends Model {
+
     public $timestamps = true;
     protected $table = 'admin_users';
-     protected $fields = [
-        'name' ,'email' , 'phone' ,
+    protected $fields = [
+        'name', 'email', 'phone',
     ];
     protected $rules = [
-        'name' => "required|unique:admin_users,name,2,status",
-        'email' => "required|unique:admin_users,email,2,status",
+        'email' => "required|unique:admin_users",
     ];
     protected $messages = [
-        'name.unique' => '用户已存在',
-        'email.unique' => '邮箱已经存在',
+        'email.unique' => '邮箱已存在',
     ];
 
     /**
@@ -41,6 +40,9 @@ class User extends Model {
                 ->skip($start)->take($length)
                 ->orderBy($columns[$order[0]['column']]['data'], $order[0]['dir'])
                 ->get();
+        foreach ($data['data'] as $k => $v) {
+            $data['data'][$k]['key'] = $k + 1;
+        }
         return $data;
     }
 
@@ -59,7 +61,7 @@ class User extends Model {
         if (isset($param['btEmail']) && !empty($param['btEmail'])) {
             $query->where('email', 'like', '%' . $param['btEmail'] . '%');
         }
-        $query->where(['status' => 1]);
+//        $query->where(['status' => 1]);
     }
 
     /**
@@ -76,31 +78,23 @@ class User extends Model {
     }
 
     /**
-     * 批量数据添加
+     * 批量用户添加
      * @param type $data
      */
     public function addAll($data) {
         $dataError = [];
         foreach ($data as $k => $v) {
-            $arr = array_combine($this->fields, $v);
-            $schoolId = $this->schoolSelect($arr['applySchool']);
-            if (!$schoolId) {
-                $dataError[$k] = $arr;
+            if (count($this->fields) != count($v)) {
+                return ['code' => 0, 'msg' => "导入信息模板错误"];
                 continue;
             }
-            $arr['applySchool'] = $schoolId;
+            $arr = array_combine($this->fields, $v);
             $dataError[$k] = $this->getAdd($arr);
         }
-        return $dataError;
-    }
-
-    public function schoolSelect($applySchool) {
-        DB::setFetchMode(PDO::FETCH_ASSOC);
-        $data = DB::table('school')->where(['name' => $applySchool])->first();
-        if($data['id']){
-            return $data['id'];
+        if (count($dataError) > 0) {
+            return ['code' => 0, 'msg' => "导入用户“ " . implode(',', $dataError) . " ”失败"];
         }
-        return false;
+        return ['code' => 1, 'msg' => "导入成功"];
     }
 
     /**
@@ -112,30 +106,12 @@ class User extends Model {
         //验证唯一性
         $validator = Validator::make($data, $this->rules, $this->messages);
         if ($validator->fails()) {
-            return $data;
+            return $data['name'];
         } else {
-            $data['created_at']=date('Y-m-d H:i:s');
-            DB::table('admin_users')->insert($data);
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $data['password'] = bcrypt(config('auth.pwd')); //初始密码
+            DB::table('info_users')->insert($data);
         }
-    }
-
-    /**
-     * 
-     * @param type $data
-     * @param type $id修改
-     */
-    public function getSave($data, $id) {
-        //验证唯一性 排除本身
-        $rules = [
-            'name' => 'required|unique:info_users,identityNum,' . $id . ',id,status,1',
-            'email' => 'required|unique:info_users,examineeNum,' . $id . ',id,status,1',
-        ];
-        $validator = Validator::make($data, $rules, $this->messages);
-        $dataArr = $this->getFind($id);
-        if ($validator->fails()) {
-            return $validator->errors()->getMessages();
-        }
-        $this->where(['id' => $id])->update($data);
     }
 
     /**
@@ -152,7 +128,7 @@ class User extends Model {
      * @return type
      */
     public function getDelete($id) {
-        return $this->where(['id' => $id])->update(['status' => 2]);
+        return $this->where(['id' => $id])->delete();
     }
 
 }
